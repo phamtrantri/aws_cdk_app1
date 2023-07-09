@@ -3,8 +3,7 @@
 # dependencies
 /node_modules
 node_modules
-./webapp_1/node_modules
-./infrastucture_1/node_modules
+./*/node_modules
 /.pnp
 .pnp.js
 
