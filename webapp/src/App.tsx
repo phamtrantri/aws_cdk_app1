@@ -1,48 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import logo from "./logo.svg";
 import "./App.css";
 
 interface Item {
-  id: string;
-  title: string;
-  status: "done" | "undone";
+  PK: string;
+  Title: string;
+  Status: "done" | "undone";
 }
 
+const apiEndpoint =
+  "https://g1r9ajw7f0.execute-api.ap-southeast-1.amazonaws.com";
+
 function App() {
-  const [list, setList] = useState<Item[]>([
-    {
-      id: "1",
-      title: "Todo 1",
-      status: "undone",
-    },
-    {
-      id: "2",
-      title: "Todo 2",
-      status: "done",
-    },
-  ]);
+  const [list, setList] = useState<Item[]>([]);
 
-  const handleUpdate = (id: string) => {
-    setList(
-      list.map((elem) => {
-        if (elem.id === id) {
-          return {
-            ...elem,
-            status: elem.status === "done" ? "undone" : "done",
-          };
-        }
+  const handleGetList = async () => {
+    const response = await axios.get(`${apiEndpoint}/todo/get-todo-list`);
+    setList(response.data.Items);
+  };
 
-        return elem;
-      })
+  useEffect(() => {
+    handleGetList();
+  }, []);
+
+  const handleUpdate = async (PK: string, status: "done" | "undone") => {
+    await axios.patch(
+      `${apiEndpoint}/todo/update/${PK}`,
+      {
+        status: status === "done" ? "undone" : "done",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
+    await handleGetList();
   };
 
-  const handleDelete = (id: string) => {
-    console.log(id);
+  const handleDelete = (PK: string) => {
+    console.log(PK);
   };
 
-  const handleAdd = () => {
-    console.log("addd");
+  const handleAdd = async () => {
+    await axios.post(
+      `${apiEndpoint}/todo/create`,
+      {
+        Title: 'TODO 2',
+        Status: 'undone'
+      }
+    );
+    await handleGetList();
   };
 
   return (
@@ -63,16 +72,20 @@ function App() {
         <ul>
           {list.map((elem) => (
             <li>
-              <input type="checkbox" onClick={() => handleUpdate(elem.id)} checked={elem.status === 'done'} />
+              <input
+                type="checkbox"
+                onClick={() => handleUpdate(elem.PK, elem.Status)}
+                checked={elem.Status === "done"}
+              />
               <span
                 style={{
                   textDecoration:
-                    elem.status === "done" ? "line-through" : undefined,
+                    elem.Status === "done" ? "line-through" : undefined,
                 }}
               >
-                {elem.title}
+                {elem.Title}
               </span>
-              <button type="button" onClick={() => handleDelete(elem.id)}>
+              <button type="button" onClick={() => handleDelete(elem.PK)}>
                 Delete
               </button>
             </li>
