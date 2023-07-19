@@ -42,7 +42,7 @@ export class ApplicationPipelineStack extends Stack {
         input: source,
         commands: [
           'cd webapp',
-          'npm ci',
+          'npm install',
           'npm run build',
           'cd ..', 
           'cd infrastructure',
